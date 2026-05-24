@@ -16,7 +16,7 @@ REPORT_FILE  = "financial_report.pdf"
 STATUS_FILE  = "report_status.json"
 
 # ── Your Groq API key (or set env var GROQ_API_KEY) ──────────────────────
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "YOUR_GROQ_API_KEY_HERE")
+GROQ_API_KEY = os.getenv("groq_api_key", "YOUR_GROQ_API_KEY_HERE")
 GROQ_MODEL   = "openai/gpt-oss-120b"
 
 
