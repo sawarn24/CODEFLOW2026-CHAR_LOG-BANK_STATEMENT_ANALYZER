@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 router = APIRouter()
 
 UPLOAD_DIR  = os.path.join(os.path.dirname(__file__), "..", "..", "uploads")
-MODEL_DIR   = r"C:\SREY2K26\finsight_model"   # ← your trained model path
+MODEL_DIR   = "sawarn24/banklytics"   # ← your trained model path
 MASTER_FILE = "transactions_master.xlsx"
 
 

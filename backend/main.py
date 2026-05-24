@@ -9,6 +9,7 @@ import os
 from routers import upload
 from routers import analyze
 from routers import anomaly
+from routers import ai_insights
 
 app = FastAPI(title="Banklytics API", version="1.0.0")
 
@@ -20,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# ── Firebase ──────────────────────────────────────────────────────────────────
 SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
 if os.path.exists(SERVICE_ACCOUNT_PATH):
     cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
@@ -28,7 +29,7 @@ if os.path.exists(SERVICE_ACCOUNT_PATH):
 else:
     print("⚠️  serviceAccountKey.json not found – Firebase verification disabled in dev mode")
 
-
+# ── Static & pages ────────────────────────────────────────────────────────────
 BASE_DIR     = r"C:\SREY2K26"
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
@@ -37,6 +38,7 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 app.include_router(upload.router,  prefix="/api")
 app.include_router(analyze.router, prefix="/api")
 app.include_router(anomaly.router, prefix="/api")
+app.include_router(ai_insights.router, prefix="/api")
 
 @app.get("/")
 def serve_login():
@@ -54,9 +56,21 @@ def serve_home():
 def serve_analysis():
     return FileResponse(os.path.join(FRONTEND_DIR, "pages", "analysis.html"))
 
+@app.get("/ai_insights")
+def serve_ai_insights():
+    return FileResponse(os.path.join(FRONTEND_DIR, "pages", "ai_insights.html"))
+
 @app.get("/anomaly")
 def serve_anomaly():
     return FileResponse(os.path.join(FRONTEND_DIR, "pages", "anomaly.html"))
+
+# In your main.py / app setup:
+from routers.report_generator import router as report_router
+app.include_router(report_router, prefix="/api")
+
+@app.get("/ai-insights")
+def serve_ai_insights():
+    return FileResponse(os.path.join(FRONTEND_DIR, "pages", "ai_insights.html"))
 
 @app.post("/api/verify-token")
 async def verify_token(payload: dict):

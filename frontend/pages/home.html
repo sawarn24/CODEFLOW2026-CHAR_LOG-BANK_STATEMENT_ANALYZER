@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0a0c0f"/>
+  <title>Banklytics – Dashboard</title>
+  <link rel="stylesheet" href="/static/css/global.css"/>
+  <style>
+    /* ─── App shell ─────────────────────────────────── */
+    .app {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Topbar ─────────────────────────────────────── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,12,15,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.25rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 0.55rem; }
+    .brand-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: grid; place-items: center; font-size: 1rem; flex-shrink: 0; }
+    .brand-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .user-chip {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 100px; font-size: 0.82rem; color: var(--text-dim);
+    }
+    .avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent); color: #0a0c0f;
+      display: grid; place-items: center; font-size: 0.7rem; font-weight: 700;
+    }
+    .signout-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 0.82rem; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;
+    }
+    .signout-btn:hover { color: var(--danger); background: rgba(248,113,113,0.08); }
+
+    /* ─── Main content ─────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 2rem 1.25rem 4rem;
+      max-width: 820px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .greeting { margin-bottom: 2rem; }
+    .greeting h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); margin-bottom: 0.3rem; }
+    .greeting p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* ─── Upload cards grid ─────────────────────────── */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .upload-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .upload-card.excel::before  { background: radial-gradient(circle at top right, rgba(74,222,128,0.06) 0%, transparent 60%); }
+    .upload-card.pdf::before    { background: radial-gradient(circle at top right, rgba(34,211,238,0.06) 0%, transparent 60%); }
+
+
+    .upload-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+    .upload-card:hover::before { opacity: 1; }
+    .upload-card.excel:hover  { border-color: var(--accent); }
+    .upload-card.pdf:hover    { border-color: var(--accent2); }
+
+    .upload-card.dragging {
+      border-style: dashed;
+      transform: scale(1.01);
+    }
+    .upload-card.excel.dragging  { border-color: var(--accent);  background: rgba(74,222,128,0.05); }
+    .upload-card.pdf.dragging    { border-color: var(--accent2); background: rgba(34,211,238,0.05); }
+
+    .card-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .card-title { font-weight: 600; font-size: 1rem; }
+    .card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+    .card-formats {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+    }
+
+    .upload-btn {
+      margin-top: auto;
+      padding: 0.6rem 1rem;
+      font-size: 0.82rem;
+      border-radius: 6px;
+    }
+    .upload-card.excel  .upload-btn { background: rgba(74,222,128,0.12);  color: var(--accent);  border: 1px solid rgba(74,222,128,0.2); }
+    .upload-card.pdf    .upload-btn { background: rgba(34,211,238,0.12);  color: var(--accent2); border: 1px solid rgba(34,211,238,0.2); }
+    .upload-btn:hover { filter: brightness(1.15); }
+
+    /* ─── Progress bar ──────────────────────────────── */
+    .upload-progress {
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+    .upload-progress.visible { display: flex; }
+    .progress-bar {
+      height: 4px; border-radius: 10px;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 10px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: progressPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes progressPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .progress-label { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ─── Result panel ──────────────────────────────── */
+    .result-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      animation: fadeUp 0.25s ease;
+    }
+    .result-panel.visible { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+
+    .result-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+    .result-title { font-size: 0.85rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+    .result-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 0.85rem;
+    }
+    .result-item-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
+    .result-item-value { font-size: 0.92rem; font-weight: 500; word-break: break-all; }
+
+    .headers-list {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem;
+    }
+    .header-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 5px; padding: 0.2rem 0.55rem; font-size: 0.75rem; color: var(--text-dim);
+    }
+
+    /* ─── Uploads history ──────────────────────────── */
+    .section-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .history-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .file-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .file-info { flex: 1; min-width: 0; }
+    .file-name { font-size: 0.88rem; font-weight: 500; truncate: ellipsis; overflow: hidden; white-space: nowrap; }
+    .file-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .history-empty { color: var(--text-muted); font-size: 0.88rem; padding: 1.5rem; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+
+    /* ─── Hidden inputs ─────────────────────────────── */
+    input[type="file"] { display: none; }
+
+    /* ─── Action buttons row ─────────────────────────── */
+    .action-row {
+      display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;
+    }
+    .btn-analyse {
+      background: var(--accent); color: #0a0c0f; font-weight: 600;
+      padding: 0.75rem 1.5rem; border-radius: var(--radius-sm);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: none; font-size: 0.9rem; cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .btn-analyse:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
+    .btn-analyse:active { transform: scale(0.97); }
+    .btn-analyse.loading { opacity: 0.7; pointer-events: none; }
+
+    .btn-clear {
+      background: transparent; border: 1px solid rgba(248,113,113,0.3);
+      color: var(--danger); padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm); font-size: 0.88rem;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-clear:hover { background: rgba(248,113,113,0.08); border-color: var(--danger); }
+
+    .txn-count-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2);
+      color: var(--accent); border-radius: 100px;
+      padding: 0.3rem 0.75rem; font-size: 0.78rem; font-weight: 500;
+    }
+
+    /* ─── Mobile bottom nav placeholder ─────────────── */
+    @media (max-width: 600px) {
+      .topbar { padding: 0 1rem; }
+      .main { padding: 1.25rem 1rem 5rem; }
+      .upload-grid { grid-template-columns: 1fr; }
+      .user-chip .user-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-brand">
+        <div class="brand-icon">₹</div>
+        <span class="brand-name">Banklytics</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-chip">
+          <div class="avatar" id="avatarEl">?</div>
+          <span class="user-name" id="userNameEl">Loading…</span>
+        </div>
+        <button class="signout-btn" onclick="handleSignOut()">Sign out</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+
+      <div class="greeting">
+        <h1>Upload Statement</h1>
+        <p>Drag & drop your bank statement or tap a card to browse</p>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-row">
+        <button class="btn-analyse" id="analyseBtn" onclick="goAnalyse()">
+          <span>🧠</span> <span id="analyseBtnText">Analyse Transactions</span>
+        </button>
+        <span class="txn-count-badge" id="txnCountBadge" style="display:none"></span>
+        <button class="btn-clear" onclick="clearData()">🗑 Clear All Data</button>
+      </div>
+
+      <!-- Upload Cards -->
+      <div class="upload-grid">
+
+        <!-- Excel card -->
+        <div class="upload-card excel" id="excelCard">
+          <div class="card-icon">📊</div>
+          <div>
+            <div class="card-title">Excel / CSV</div>
+            <div class="card-desc">Digital bank statement exported as spreadsheet</div>
+          </div>
+          <div class="card-formats">
+            <span class="badge badge-green">.xlsx</span>
+            <span class="badge badge-green">.xls</span>
+            <span class="badge badge-green">.csv</span>
+          </div>
+          <div class="upload-progress" id="excelProgress">
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            <span class="progress-label">Uploading…</span>
+          </div>
+          <button class="btn upload-btn" onclick="triggerUpload('excelInput')">Choose File</button>
+        </div>
+
+        <!-- Text PDF card -->
+        <div class="upload-card pdf" id="pdfCard">
+          <div class="card-icon">📄</div>
+          <div>
+            <div class="card-title">Digital PDF</div>
+            <div class="card-desc">Machine-readable PDF with selectable text</div>
+          </div>
+          <div class="card-formats">
+            <span class="badge badge-cyan">.pdf</span>
+          </div>
+          <div class="upload-progress" id="pdfProgress">
+            <div class="progress-bar"><div class="progress-fill" style="background:var(--accent2)"></div></div>
+            <span class="progress-label">Uploading…</span>
+          </div>
+          <button class="btn upload-btn" onclick="triggerUpload('pdfInput')">Choose File</button>
+        </div>
+
+
+
+      <!-- Hidden file inputs -->
+      <input type="file" id="excelInput"   accept=".xlsx,.xls,.csv"/>
+      <input type="file" id="pdfInput"     accept=".pdf"/>
+
+      <!-- Result panel -->
+      <div class="result-panel" id="resultPanel">
+        <div class="result-header">
+          <span class="result-title" id="resultTitle">Upload Result</span>
+          <button class="btn btn-ghost" style="font-size:0.8rem;padding:0.3rem 0.6rem;" onclick="closeResult()">✕ Close</button>
+        </div>
+        <div class="result-grid" id="resultGrid"></div>
+        <div class="headers-list" id="headersList"></div>
+      </div>
+
+      <!-- Upload history -->
+      <div>
+        <div class="section-title">Recent Uploads</div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">No uploads yet — add your first statement above</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="/static/js/utils.js"></script>
+  <script>
+    initFirebase();
+
+    // ── Auth guard ──
+    let currentUser = null;
+    (async () => {
+      currentUser = await requireAuth();
+      if (!currentUser) return;
+      // Set avatar & name
+      const name  = currentUser.displayName || currentUser.email || "User";
+      const initials = name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      document.getElementById("avatarEl").textContent    = initials;
+      document.getElementById("userNameEl").textContent  = name.split(" ")[0];
+      loadHistory();
+      updateTxnBadge();
+    })();
+
+    // ── Sign out ──
+    function handleSignOut() {
+      signOut();
+    }
+
+    // ── Drag & Drop on cards ──
+    ["excelCard","pdfCard"].forEach(id => {
+      const card = document.getElementById(id);
+      card.addEventListener("dragover",  (e) => { e.preventDefault(); card.classList.add("dragging"); });
+      card.addEventListener("dragleave", ()  => card.classList.remove("dragging"));
+      card.addEventListener("drop", (e) => {
+        e.preventDefault();
+        card.classList.remove("dragging");
+        const files = e.dataTransfer.files;
+        if (!files.length) return;
+        if      (id === "excelCard") handleFile(files[0], "excel");
+        else if (id === "pdfCard")   handleFile(files[0], "pdf");
+      });
+    });
+
+    // ── File input triggers ──
+    function triggerUpload(inputId) {
+      document.getElementById(inputId).click();
+    }
+    document.getElementById("excelInput").addEventListener("change", (e) => e.target.files[0] && handleFile(e.target.files[0], "excel"));
+    document.getElementById("pdfInput").addEventListener("change",   (e) => e.target.files[0] && handleFile(e.target.files[0], "pdf"));
+
+    // ── Upload logic ──
+    async function handleFile(file, type) {
+      const progressId = { excel: "excelProgress", pdf: "pdfProgress" }[type];
+      const progress = document.getElementById(progressId);
+      progress.classList.add("visible");
+      progress.querySelector(".progress-label").textContent = `Uploading ${file.name}…`;
+
+      let pct = 0;
+      const fill = progress.querySelector(".progress-fill");
+      const timer = setInterval(() => {
+        pct = Math.min(pct + Math.random() * 15, 88);
+        fill.style.width = pct + "%";
+      }, 150);
+
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+
+        const endpoint = (type === "excel") ? "/api/upload/excel" : "/api/upload/pdf";
+        const result   = await apiUpload(endpoint, fd);
+
+        clearInterval(timer);
+        fill.style.width = "100%";
+        setTimeout(() => { progress.classList.remove("visible"); fill.style.width="0%"; }, 800);
+
+        showResult(result, type);
+        toast(`${file.name} uploaded successfully`, "success");
+        loadHistory();
+      } catch (err) {
+        clearInterval(timer);
+        progress.classList.remove("visible");
+        fill.style.width = "0%";
+        toast(`Upload failed: ${err.message}`, "error");
+      }
+    }
+
+    // ── Show result panel ──
+    function showResult(data, type) {
+      const panel  = document.getElementById("resultPanel");
+      const grid   = document.getElementById("resultGrid");
+      const hList  = document.getElementById("headersList");
+      const title  = document.getElementById("resultTitle");
+
+      const labels = {
+        excel: "Excel / CSV Result",
+        pdf:   "PDF Result",
+      };
+      title.textContent = labels[type] || "Upload Result";
+      grid.innerHTML  = "";
+      hList.innerHTML = "";
+
+      const skip = ["headers", "preview", "sheets"];
+      for (const [k, v] of Object.entries(data)) {
+        if (skip.includes(k)) continue;
+        const item = document.createElement("div");
+        item.className = "result-item";
+        item.innerHTML = `<div class="result-item-label">${k.replace(/_/g," ")}</div><div class="result-item-value">${Array.isArray(v) ? v.join(", ") : v}</div>`;
+        grid.appendChild(item);
+      }
+
+      if (data.headers?.length) {
+        data.headers.forEach(h => {
+          if (!h) return;
+          const chip = document.createElement("span");
+          chip.className = "header-chip";
+          chip.textContent = h;
+          hList.appendChild(chip);
+        });
+      }
+
+      panel.classList.add("visible");
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function closeResult() {
+      document.getElementById("resultPanel").classList.remove("visible");
+    }
+
+    // ── Pipeline status overlay ──────────────────────────────────────────────
+    function showPipelineOverlay() {
+      let el = document.getElementById("pipelineOverlay");
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "pipelineOverlay";
+        el.innerHTML = `
+          <div class="po-box">
+            <div class="po-logo">₹</div>
+            <div class="po-title">Running Full Analysis Pipeline</div>
+            <div class="po-sub">Both pipelines are running in parallel — you'll be redirected automatically.</div>
+            <div class="po-steps" id="poSteps">
+              <div class="po-step" id="ps-analyze"><span class="po-dot active"></span><span>Categorising transactions (AI model)…</span></div>
+              <div class="po-step" id="ps-anomaly"><span class="po-dot active"></span><span>Training Isolation Forest…</span></div>
+            </div>
+            <div class="po-bar-wrap"><div class="po-bar" id="poBar"></div></div>
+            <div class="po-msg" id="poMsg">Initialising…</div>
+          </div>`;
+        el.style.cssText = `
+          position:fixed;inset:0;background:rgba(10,12,15,0.92);backdrop-filter:blur(8px);
+          display:flex;align-items:center;justify-content:center;z-index:9000;animation:fadeUp 0.2s ease`;
+        document.head.insertAdjacentHTML("beforeend", `<style>
+          .po-box{background:#0d1117;border:1px solid #1e2a38;border-radius:16px;padding:2rem 2.5rem;
+            max-width:420px;width:90%;text-align:center;display:flex;flex-direction:column;gap:1rem}
+          .po-logo{width:48px;height:48px;background:var(--accent);border-radius:12px;display:grid;
+            place-items:center;font-size:1.4rem;font-weight:700;color:#0a0c0f;margin:0 auto}
+          .po-title{font-size:1.05rem;font-weight:600}
+          .po-sub{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+          .po-steps{display:flex;flex-direction:column;gap:0.5rem;text-align:left}
+          .po-step{display:flex;align-items:center;gap:0.65rem;font-size:0.82rem;color:#8899aa}
+          .po-step.done{color:#4ade80}
+          .po-step.done .po-dot{background:#4ade80!important;animation:none!important}
+          .po-dot{width:8px;height:8px;border-radius:50%;background:#1e2a38;flex-shrink:0;transition:all 0.3s}
+          .po-dot.active{background:var(--accent);animation:pulse 1s infinite}
+          .po-dot.done{background:#4ade80;animation:none}
+          .po-bar-wrap{height:4px;background:#1e2a38;border-radius:10px;overflow:hidden;margin-top:0.5rem}
+          .po-bar{height:100%;background:var(--accent);border-radius:10px;width:0%;transition:width 0.5s ease}
+          .po-msg{font-size:0.78rem;color:var(--text-muted)}
+          @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+        </style>`);
+        document.body.appendChild(el);
+      }
+      el.style.display = "flex";
+      return el;
+    }
+
+    function updatePoStep(id, state) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const dot = el.querySelector(".po-dot");
+      dot.className = "po-dot " + state;
+      if (state === "done") el.classList.add("done");
+    }
+
+    function setPoProgress(pct, msg) {
+      const bar = document.getElementById("poBar");
+      const lbl = document.getElementById("poMsg");
+      if (bar) bar.style.width = pct + "%";
+      if (lbl) lbl.textContent = msg;
+    }
+
+    // ── Main pipeline orchestrator ───────────────────────────────────────────
+    async function goAnalyse() {
+      const count = await getTransactionCount();
+      if (count === 0) {
+        toast("Upload a bank statement first", "error");
+        return;
+      }
+
+      const btn      = document.getElementById("analyseBtn");
+      const btnText  = document.getElementById("analyseBtnText");
+      btn.classList.add("loading");
+      btnText.textContent = "Launching pipeline…";
+
+      showPipelineOverlay();
+      setPoProgress(5, "Starting both pipelines…");
+
+      try {
+        // ── Run /analyze and /anomaly/detect in PARALLEL ─────────────────────
+        setPoProgress(10, "Running AI categorisation and anomaly detection in parallel…");
+
+        const [analyzeResult, anomalyResult] = await Promise.all([
+          apiFetch("/api/analyze", { method: "POST" }).then(r => {
+            updatePoStep("ps-analyze", "done");
+            setPoProgress(40, "Categorisation complete ✓");
+            return r;
+          }),
+          apiFetch("/api/anomaly/detect", { method: "POST" }).then(r => {
+            updatePoStep("ps-anomaly", "done");
+            setPoProgress(50, "Anomaly detection complete ✓");
+            return r;
+          }),
+        ]);
+
+        setPoProgress(100, "Both pipelines done! Redirecting to analysis…");
+        await new Promise(r => setTimeout(r, 800));
+
+        // ── Navigate to analysis dashboard ────────────────────────────────────
+        window.location.href = "/analysis";
+
+      } catch(err) {
+        document.getElementById("pipelineOverlay").style.display = "none";
+        toast(`Pipeline error: ${err.message}`, "error");
+        btn.classList.remove("loading");
+        btnText.textContent = "Analyse Transactions";
+      }
+    }
+
+    // ── Clear data ──
+    async function clearData() {
+      if (!confirm("This will delete ALL saved transactions. Are you sure?")) return;
+      try {
+        await apiFetch("/api/clear-data", { method: "POST" });
+        toast("All data cleared", "success");
+        updateTxnBadge();
+        loadHistory();
+      } catch (err) {
+        toast(err.message, "error");
+      }
+    }
+
+    // ── Transaction count badge ──
+    async function getTransactionCount() {
+      try {
+        const data = await apiFetch("/api/transactions");
+        return data.total || 0;
+      } catch { return 0; }
+    }
+
+    async function updateTxnBadge() {
+      const count = await getTransactionCount();
+      const badge = document.getElementById("txnCountBadge");
+      if (count > 0) {
+        badge.textContent = `${count} transactions saved`;
+        badge.style.display = "inline-flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+
+    // ── Load upload history ──
+    async function loadHistory() {
+      const list = document.getElementById("historyList");
+      try {
+        const data = await apiFetch("/api/uploads");
+        if (!data.files?.length) {
+          list.innerHTML = `<div class="history-empty">No uploads yet — add your first statement above</div>`;
+          return;
+        }
+        list.innerHTML = data.files.map(f => {
+          const ext = f.name.split(".").pop().toLowerCase();
+          const icon = ext === "pdf" ? "📄" : (ext === "csv" ? "📋" : "📊");
+          const date = new Date(f.uploaded_at + "Z").toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
+          return `
+            <div class="history-item">
+              <span class="file-icon">${icon}</span>
+              <div class="file-info">
+                <div class="file-name">${f.name}</div>
+                <div class="file-meta">${f.size_kb} KB &middot; ${date}</div>
+              </div>
+              <span class="badge ${ext==='pdf'?'badge-cyan':'badge-green'}">${ext.toUpperCase()}</span>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        list.innerHTML = `<div class="history-empty">Could not load history</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

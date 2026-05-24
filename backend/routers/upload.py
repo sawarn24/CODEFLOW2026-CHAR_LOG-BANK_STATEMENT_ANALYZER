@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Header
+from fastapi import APIRouter, UploadFile, File, HTTPException, Header
 from fastapi.responses import JSONResponse, FileResponse
 import os, shutil, uuid, math
 from datetime import datetime
@@ -59,8 +59,7 @@ async def upload_excel(
             return JSONResponse({"status": "parsed_empty", "filename": unique_name,
                                  "message": "No transactions found in this file"})
 
-        stats = append_transactions(df, uid, UPLOAD_DIR, source_file=file.filename)
-
+        stats   = append_transactions(df, uid, UPLOAD_DIR, source_file=file.filename)
         preview = sanitize(df.head(5).to_dict(orient="records"))
 
         return {
@@ -81,7 +80,6 @@ async def upload_excel(
 @router.post("/upload/pdf")
 async def upload_pdf(
     file: UploadFile = File(...),
-    is_scanned: bool = Form(False),
     authorization: str = Header(None),
 ):
     if not file.filename.lower().endswith(".pdf"):
@@ -90,21 +88,13 @@ async def upload_pdf(
     uid = get_uid(authorization)
     dest, unique_name = save_upload(file, uid)
 
-    if is_scanned:
-        return {
-            "status":   "saved_for_ocr",
-            "filename": unique_name,
-            "message":  "Scanned PDF saved. Run your OCR pipeline then POST text to /api/parse/ocr-result",
-        }
-
     try:
         df = parse_pdf(dest)
         if df.empty:
             return JSONResponse({"status": "parsed_empty", "filename": unique_name,
-                                 "message": "No transactions found — may be a scanned PDF, try the Scanned PDF option"})
+                                 "message": "No transactions found in this PDF"})
 
-        stats = append_transactions(df, uid, UPLOAD_DIR, source_file=file.filename)
-
+        stats   = append_transactions(df, uid, UPLOAD_DIR, source_file=file.filename)
         preview = sanitize(df.head(5).to_dict(orient="records"))
 
         return {

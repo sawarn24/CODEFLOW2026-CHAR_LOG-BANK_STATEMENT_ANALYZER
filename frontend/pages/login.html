@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0a0c0f"/>
+  <title>Banklytics – Sign In</title>
+  <link rel="stylesheet" href="/static/css/global.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #0a0c0f;
+      color: #e8eaf0;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Background ── */
+    .bg-scene {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Animated grid */
+    .bg-scene::before {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      background-image:
+        linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridShift 20s linear infinite;
+    }
+    @keyframes gridShift {
+      0%   { transform: translate(0,0); }
+      100% { transform: translate(48px, 48px); }
+    }
+
+    /* Radial glow spots */
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      animation: glowDrift 14s ease-in-out infinite alternate;
+    }
+    .glow-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(74,222,128,0.12) 0%, transparent 70%);
+      top: -150px; right: -100px;
+    }
+    .glow-2 {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 70%);
+      bottom: -100px; left: -80px;
+      animation-delay: -7s;
+    }
+    .glow-3 {
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(74,222,128,0.07) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -3s;
+    }
+    @keyframes glowDrift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(30px, 40px) scale(1.08); }
+    }
+
+    /* Noise overlay */
+    .bg-noise {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.6;
+    }
+
+    /* ── Layout ── */
+    .auth-wrap {
+      position: relative;
+      z-index: 1;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .auth-panel {
+      width: 100%;
+      max-width: 420px;
+      animation: panelIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Brand ── */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 2.25rem;
+      padding-left: 0.25rem;
+    }
+    .brand-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0a0c0f;
+      box-shadow: 0 0 24px rgba(74,222,128,0.35), 0 0 48px rgba(74,222,128,0.1);
+      flex-shrink: 0;
+    }
+    .brand-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.45rem;
+      color: #e8eaf0;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Card ── */
+    .auth-card {
+      background: rgba(17,19,23,0.85);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 2.25rem 2rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow:
+        0 1px 0 0 rgba(255,255,255,0.05) inset,
+        0 -1px 0 0 rgba(0,0,0,0.5) inset,
+        0 4px 6px -1px rgba(0,0,0,0.4),
+        0 20px 60px -10px rgba(0,0,0,0.5),
+        0 0 80px -20px rgba(74,222,128,0.06);
+    }
+
+    .auth-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.7rem;
+      color: #e8eaf0;
+      margin-bottom: 0.35rem;
+      line-height: 1.15;
+    }
+    .auth-sub {
+      color: #6b717f;
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Form ── */
+    .auth-form { display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #9198a8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b717f;
+      font-size: 0.95rem;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+    .form-input {
+      width: 100%;
+      background: rgba(24,27,33,0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: #e8eaf0;
+      padding: 0.8rem 1rem 0.8rem 2.6rem;
+      font-size: 0.92rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .form-input:focus {
+      border-color: rgba(74,222,128,0.5);
+      background: rgba(24,27,33,1);
+      box-shadow: 0 0 0 3px rgba(74,222,128,0.1), 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .form-input:focus + .input-line { transform: scaleX(1); }
+    .form-input::placeholder { color: #3e4450; }
+    .form-input.error { border-color: rgba(248,113,113,0.5); box-shadow: 0 0 0 3px rgba(248,113,113,0.08); }
+
+    .form-input:focus ~ .input-icon,
+    .input-wrap:focus-within .input-icon { color: #4ade80; }
+
+    .form-error {
+      font-size: 0.775rem;
+      color: #f87171;
+      display: none;
+      align-items: center;
+      gap: 0.3rem;
+      padding-left: 0.25rem;
+    }
+    .form-error.visible { display: flex; }
+
+    .forgot-link {
+      font-size: 0.78rem;
+      color: #6b717f;
+      text-align: right;
+      display: block;
+      margin-top: 0.1rem;
+      transition: color 0.15s;
+    }
+    .forgot-link:hover { color: #4ade80; }
+
+    /* ── Buttons ── */
+    .btn-submit {
+      margin-top: 0.4rem;
+      width: 100%;
+      padding: 0.875rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+      color: #0a0c0f;
+      box-shadow: 0 0 24px rgba(74,222,128,0.25), 0 4px 12px rgba(0,0,0,0.3);
+      transition: box-shadow 0.2s, transform 0.15s, opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-submit:hover {
+      box-shadow: 0 0 36px rgba(74,222,128,0.4), 0 6px 16px rgba(0,0,0,0.3);
+      transform: translateY(-1px);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(255,255,255,0.12), transparent);
+    }
+    .btn-submit .btn-text { position: relative; z-index: 1; transition: opacity 0.15s; }
+    .btn-submit.loading .btn-text { opacity: 0; }
+    .btn-submit .btn-spinner { position: absolute; display: none; }
+    .btn-submit.loading .btn-spinner { display: flex; }
+    .btn-submit.loading { opacity: 0.85; cursor: not-allowed; }
+
+    /* Google btn */
+    .btn-google {
+      width: 100%;
+      padding: 0.825rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      background: rgba(24,27,33,0.7);
+      color: #e8eaf0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+    .btn-google:hover {
+      border-color: rgba(34,211,238,0.4);
+      background: rgba(34,211,238,0.04);
+      transform: translateY(-1px);
+    }
+    .btn-google:active { transform: scale(0.98); }
+    .btn-google.loading { opacity: 0.7; cursor: not-allowed; }
+
+    .g-icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 9.5c3.5 0 6.3 1.2 8.5 3.2l6.3-6.3C34.9 2.8 29.8.5 24 .5 14.6.5 6.5 6.1 2.7 14.1l7.4 5.7C12 13.7 17.5 9.5 24 9.5z'/%3E%3Cpath fill='%234285F4' d='M46.5 24.5c0-1.7-.2-3.4-.5-5H24v9.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7c4.3-4 6.8-9.9 6.8-17.4z'/%3E%3Cpath fill='%23FBBC05' d='M10.1 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.1.6-4.6l-7.4-5.7A23.5 23.5 0 0 0 .5 24c0 3.8.9 7.4 2.2 10.6l7.4-6z'/%3E%3Cpath fill='%2334A853' d='M24 47.5c5.8 0 10.7-1.9 14.3-5.2l-7.4-5.7c-2 1.3-4.5 2-6.9 2-6.5 0-12-4.2-13.9-10l-7.4 6C6.5 42 14.7 47.5 24 47.5z'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      color: #3e4450;
+      font-size: 0.75rem;
+      margin: 0.15rem 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(10,12,15,0.3);
+      border-top-color: #0a0c0f;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ── */
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.4rem;
+      font-size: 0.85rem;
+      color: #6b717f;
+    }
+    .auth-footer a { color: #4ade80; font-weight: 500; text-decoration: none; }
+    .auth-footer a:hover { color: #22d3ee; }
+
+    /* ── Security badge ── */
+    .security-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 1.5rem;
+      font-size: 0.72rem;
+      color: #3e4450;
+    }
+    .security-note svg { flex-shrink: 0; }
+
+    /* ── Toast ── */
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(17,19,23,0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 0.75rem 1.1rem;
+      font-size: 0.85rem;
+      color: #e8eaf0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      animation: slideIn 0.25s ease forwards;
+      pointer-events: all;
+      max-width: 300px;
+      backdrop-filter: blur(12px);
+    }
+    .toast.success { border-left: 3px solid #4ade80; }
+    .toast.error   { border-left: 3px solid #f87171; }
+    .toast.fadeOut { animation: fadeOut 0.3s ease forwards; }
+    @keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: none; } }
+    @keyframes fadeOut { to { opacity:0; transform: translateX(20px); } }
+
+    /* ── Mobile ── */
+    @media (max-width: 480px) {
+      .auth-wrap { padding: 1.25rem 1rem; align-items: flex-start; padding-top: 2.5rem; }
+      .auth-card { padding: 1.75rem 1.4rem; border-radius: 16px; }
+      .auth-heading { font-size: 1.5rem; }
+      .brand { margin-bottom: 1.75rem; }
+    }
+    @media (max-width: 360px) {
+      .auth-card { padding: 1.5rem 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background scene -->
+  <div class="bg-scene">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
+    <div class="bg-noise"></div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <div class="auth-wrap">
+    <div class="auth-panel">
+
+      <div class="brand">
+        <div class="brand-icon">₹</div>
+        <span class="brand-name">Banklytics</span>
+      </div>
+
+      <div class="auth-card">
+        <h2 class="auth-heading">Welcome back</h2>
+        <p class="auth-sub">Sign in to your financial dashboard</p>
+
+        <div class="auth-form" id="loginForm">
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <div class="input-wrap">
+              <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              </span>
+            </div>
+            <span class="form-error" id="emailErr">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <span id="emailErrTxt"></span>
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-wrap">
+              <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+            </div>
+            <span class="form-error" id="passErr">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <span id="passErrTxt"></span>
+            </span>
+            <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+          </div>
+
+          <span class="form-error" id="globalErr" style="margin-top:0.1rem;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span id="globalErrTxt"></span>
+          </span>
+
+          <button class="btn-submit" id="loginBtn" type="button">
+            <span class="btn-text">Sign In</span>
+            <span class="btn-spinner"><span class="spinner" style="border-top-color:#0a0c0f; border-color:rgba(10,12,15,0.2); border-top-color:#0a0c0f;"></span></span>
+          </button>
+
+          <div class="divider">or continue with</div>
+
+          <button class="btn-google" id="googleBtn" type="button">
+            <span class="g-icon"></span>
+            Sign in with Google
+          </button>
+
+        </div>
+      </div>
+
+      <p class="auth-footer">
+        Don't have an account? <a href="/register">Create one</a>
+      </p>
+
+      <div class="security-note">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secured with 256-bit encryption
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="/static/js/utils.js"></script>
+  <script>
+    initFirebase();
+    requireGuest();
+
+    const emailInput = document.getElementById("email");
+    const passInput  = document.getElementById("password");
+    const loginBtn   = document.getElementById("loginBtn");
+    const googleBtn  = document.getElementById("googleBtn");
+    const emailErr   = document.getElementById("emailErr");
+    const passErr    = document.getElementById("passErr");
+    const globalErr  = document.getElementById("globalErr");
+    const forgotLink = document.getElementById("forgotLink");
+
+    function setLoading(btn, on) {
+      btn.classList.toggle("loading", on);
+      btn.disabled = on;
+    }
+
+    function clearErrors() {
+      [emailErr, passErr, globalErr].forEach(e => e.classList.remove("visible"));
+      document.getElementById("emailErrTxt").textContent = "";
+      document.getElementById("passErrTxt").textContent = "";
+      document.getElementById("globalErrTxt").textContent = "";
+      [emailInput, passInput].forEach(i => i.classList.remove("error"));
+    }
+
+    function showErr(errEl, txtId, msg, inputEl) {
+      document.getElementById(txtId).textContent = msg;
+      errEl.classList.add("visible");
+      if (inputEl) inputEl.classList.add("error");
+    }
+
+    function showGlobalError(msg) {
+      showErr(globalErr, "globalErrTxt", msg, null);
+    }
+
+    loginBtn.addEventListener("click", async () => {
+      clearErrors();
+      const email = emailInput.value.trim();
+      const pass  = passInput.value;
+      if (!email) { showErr(emailErr, "emailErrTxt", "Email required", emailInput); return; }
+      if (!pass)  { showErr(passErr,  "passErrTxt",  "Password required", passInput); return; }
+      setLoading(loginBtn, true);
+      try {
+        await getAuth().signInWithEmailAndPassword(email, pass);
+        toast("Signed in!", "success");
+        window.location.href = "/home";
+      } catch (err) {
+        showGlobalError(firebaseErrorMsg(err.code));
+      } finally {
+        setLoading(loginBtn, false);
+      }
+    });
+
+    googleBtn.addEventListener("click", async () => {
+      clearErrors();
+      setLoading(googleBtn, true);
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await getAuth().signInWithPopup(provider);
+        window.location.href = "/home";
+      } catch (err) {
+        if (err.code !== "auth/popup-closed-by-user") showGlobalError(firebaseErrorMsg(err.code));
+      } finally {
+        setLoading(googleBtn, false);
+      }
+    });
+
+    forgotLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if (!email) { showErr(emailErr, "emailErrTxt", "Enter your email first", emailInput); return; }
+      try {
+        await getAuth().sendPasswordResetEmail(email);
+        toast("Reset email sent!", "success");
+      } catch (err) {
+        showGlobalError(firebaseErrorMsg(err.code));
+      }
+    });
+
+    [emailInput, passInput].forEach(el => {
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter") loginBtn.click(); });
+    });
+
+    // Toast utility (fallback if utils.js not loaded)
+    if (typeof toast === 'undefined') {
+      window.toast = function(msg, type = 'info', duration = 3000) {
+        const c = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => { t.classList.add('fadeOut'); setTimeout(() => t.remove(), 300); }, duration);
+      };
+    }
+  </script>
+</body>
+</html>
