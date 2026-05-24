@@ -9,8 +9,8 @@ from dotenv import load_dotenv
  
 load_dotenv()
  
-from routers import upload, analyze, anomaly, ai_insights
-from routers.report_generator import router as report_router
+from backend.routers import upload, analyze, anomaly, ai_insights
+from backend.routers.report_generator import router as report_router
  
 app = FastAPI(title="Banklytics API", version="1.0.0")
  
