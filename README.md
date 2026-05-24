@@ -5,6 +5,15 @@
 
 ---
 
+## Download
+
+| Resource | Link |
+|---|---|
+| 📱 **Android APK** | [Download APK](https://drive.google.com/file/d/17p_72mTfbBS57rzJQfWEIInk-o501aB_/view?usp=drive_link) |
+| 🤗 **Hugging Face Model** | [sawarn24/banklytics](https://huggingface.co/sawarn24/banklytics) |
+
+---
+
 ## What It Does
 
 Banklytics turns raw bank statement exports (PDF or Excel) into a full financial intelligence dashboard. It parses your transactions, uses a fine-tuned DistilBERT model to categorise each one, then trains an Isolation Forest model on *your own spending patterns* to flag anomalies. Finally, it applies real-world economist rules (50/30/20 budget rule, savings rate, emergency fund ratio, MoM spending velocity) to produce a financial health score and actionable recommendations.
@@ -33,7 +42,7 @@ Banklytics turns raw bank statement exports (PDF or Excel) into a full financial
 C:\SREY2K26\
 ├── backend\
 │   ├── main.py                  # FastAPI app, routes, Firebase init
-│   ├── serviceAccountKey.json   # Firebase service account (not in repo)
+│   ├── .env                     # Firebase credentials (not in repo)
 │   ├── routers\
 │   │   ├── upload.py            # POST /api/upload/excel, /api/upload/pdf
 │   │   ├── analyze.py           # POST /api/analyze, GET /api/analysis/data
@@ -55,7 +64,7 @@ C:\SREY2K26\
 │       ├── analysis.html        # Basic analytics dashboard (donut, bar chart, table)
 │       └── insights.html        # AI Intelligence Dashboard (anomalies, health score, PDF)
 │
-├── uploads\                     # Per-user transaction storage (gitignored)
+├── uploads\                     # Per-user transaction storage
 │   └── <uid>\
 │       ├── transactions_master.xlsx
 │       └── insights_cache.json
@@ -78,7 +87,7 @@ git clone <your-repo>
 cd SREY2K26
 
 pip install -r requirements.txt
-pip install scikit-learn reportlab   # for insights module
+pip install scikit-learn reportlab
 ```
 
 **`requirements.txt` includes:**
@@ -95,18 +104,36 @@ torch>=2.7.0
 aiofiles>=23.2.1
 scikit-learn
 reportlab
+python-dotenv
 ```
 
 ### 2. Firebase setup
 
 1. Go to [Firebase Console](https://console.firebase.google.com) → your project → Project Settings → Service Accounts
-2. Click **Generate new private key** → save as `backend/serviceAccountKey.json`
-3. Enable **Email/Password** and **Google** sign-in under Authentication → Sign-in method
-4. The Firebase web config in `frontend/js/utils.js` is already set — replace with your own project config if needed
+2. Click **Generate new private key**
+3. Create a `.env` file in `backend/` with the following fields from the key:
+
+```
+type=service_account
+project_id=your_project_id
+private_key_id=your_key_id
+private_key="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+client_email=your_client_email
+client_id=your_client_id
+auth_uri=https://accounts.google.com/o/oauth2/auth
+token_uri=https://oauth2.googleapis.com/token
+auth_provider_x509_cert_url=https://www.googleapis.com/oauth2/v1/certs
+client_x509_cert_url=your_client_cert_url
+universe_domain=googleapis.com
+
+FRONTEND_DIR=C:\SREY2K26\frontend
+```
+
+4. Enable **Email/Password** and **Google** sign-in under Authentication → Sign-in method
 
 ### 3. Place your DistilBERT model
 
-Put your trained model folder at `C:\SREY2K26\finsight_model\` with:
+Download from [sawarn24/banklytics](https://huggingface.co/sawarn24/banklytics) and place at `C:\SREY2K26\finsight_model\` with:
 - `config.json`
 - `model.safetensors` (or `pytorch_model.bin`)
 - `tokenizer_config.json`, `vocab.txt`
@@ -116,12 +143,10 @@ Put your trained model folder at `C:\SREY2K26\finsight_model\` with:
 
 ```bash
 cd backend
-python main.py
+uvicorn main:app --reload
 ```
 
-Server starts at `http://localhost:8000`. Open in browser.
-
-> **Note:** `BASE_DIR` and `MODEL_DIR` paths in `main.py` and `analyze.py` are hardcoded to `C:\SREY2K26`. Update these if your project lives elsewhere.
+Server starts at `http://localhost:8000`.
 
 ---
 
@@ -213,8 +238,6 @@ The parsers are tested against:
 - **HDFC** — Excel and PDF
 - **ICICI** — Excel
 - **Any bank** exporting standard CSV with date/description/debit/credit/balance columns
-
-The column aliasing system handles common variations: `narration`, `particulars`, `description`, `remarks`, `txn details` are all mapped to `TRANSACTION`. Date formats `DD/MM/YYYY`, `DD-MM-YY`, `DD Mon YYYY` are all handled.
 
 ---
 
