@@ -1,0 +1,261 @@
+{
+  "generated_at": "2026-05-24T12:33:35.826951",
+  "total_txns": 117,
+  "summary": {
+    "total_credit": 64499.0,
+    "total_debit": 87540.74,
+    "net_flow": -23041.740000000005,
+    "latest_balance": 6569.25,
+    "total_transactions": 117
+  },
+  "anomalies": [
+    {
+      "index": 2,
+      "date": "27/04/2026",
+      "transaction": "27/04/2026 UPI/DR/611760998898/SRI SAI -",
+      "merchant": "Sri Sai -",
+      "amount": 7499.0,
+      "type": "DEBIT",
+      "category": "UPI Person Transfer",
+      "balance": 11139.25,
+      "severity": "CRITICAL",
+      "score": -0.5802,
+      "reasons": [
+        "Top 5% largest transaction"
+      ]
+    },
+    {
+      "index": 3,
+      "date": "27/04/2026",
+      "transaction": "27/04/2026 UPI/CR/272058089028/SHALINI/H - -",
+      "merchant": "Shalini",
+      "amount": 7000.0,
+      "type": "CREDIT",
+      "category": "UPI Person Transfer",
+      "balance": 18638.25,
+      "severity": "CRITICAL",
+      "score": -0.6356,
+      "reasons": [
+        "Top 5% largest transaction"
+      ]
+    },
+    {
+      "index": 4,
+      "date": "27/04/2026",
+      "transaction": "27/04/2026 UPI/CR/883119923185/JITENDRA/ - -",
+      "merchant": "Jitendra",
+      "amount": 7000.0,
+      "type": "DEBIT",
+      "category": "Shopping",
+      "balance": 11638.25,
+      "severity": "CRITICAL",
+      "score": -0.6349,
+      "reasons": [
+        "3.4x above your usual Shopping amount",
+        "Top 5% largest transaction"
+      ]
+    },
+    {
+      "index": 10,
+      "date": "26/04/2026",
+      "transaction": "26/04/2026 UPI/CR/648248694219/Mr RAVI - -",
+      "merchant": "Mr Ravi - -",
+      "amount": 2500.0,
+      "type": "CREDIT",
+      "category": "UPI Person Transfer",
+      "balance": 6538.25,
+      "severity": "CRITICAL",
+      "score": -0.6086,
+      "reasons": [
+        "Weekend transaction \u2014 unusual pattern"
+      ]
+    },
+    {
+      "index": 87,
+      "date": "13/04/2026",
+      "transaction": "13/04/2026 UPI/CR/646902252902/Flipkart/YE - -",
+      "merchant": "Flipkart",
+      "amount": 249.0,
+      "type": "CREDIT",
+      "category": "Shopping",
+      "balance": 8960.99,
+      "severity": "CRITICAL",
+      "score": -0.629,
+      "reasons": [
+        "Unusual pattern detected by AI model"
+      ]
+    },
+    {
+      "index": 99,
+      "date": "11/04/2026",
+      "transaction": "11/04/2026 UPI/DR/610170674331/PARWAAZ/ -",
+      "merchant": "Parwaaz",
+      "amount": 21000.0,
+      "type": "DEBIT",
+      "category": "UPI Person Transfer",
+      "balance": 8978.99,
+      "severity": "CRITICAL",
+      "score": -0.708,
+      "reasons": [
+        "5.6x above your usual UPI Person Transfer amount",
+        "Weekend transaction \u2014 unusual pattern",
+        "Top 5% largest transaction"
+      ]
+    },
+    {
+      "index": 100,
+      "date": "11/04/2026",
+      "transaction": "11/04/2026 UPI/CR/610170668588/AYUSH - -",
+      "merchant": "Ayush - -",
+      "amount": 7000.0,
+      "type": "CREDIT",
+      "category": "UPI Person Transfer",
+      "balance": 29978.99,
+      "severity": "CRITICAL",
+      "score": -0.5948,
+      "reasons": [
+        "Weekend transaction \u2014 unusual pattern",
+        "Top 5% largest transaction"
+      ]
+    },
+    {
+      "index": 101,
+      "date": "11/04/2026",
+      "transaction": "11/04/2026 UPI/CR/032544220469/SHALINI/H - -",
+      "merchant": "Shalini",
+      "amount": 15000.0,
+      "type": "CREDIT",
+      "category": "UPI Person Transfer",
+      "balance": 22978.99,
+      "severity": "CRITICAL",
+      "score": -0.669,
+      "reasons": [
+        "3.8x above your usual UPI Person Transfer amount",
+        "Weekend transaction \u2014 unusual pattern",
+        "Top 5% largest transaction"
+      ]
+    },
+    {
+      "index": 113,
+      "date": "07/04/2026",
+      "transaction": "07/04/2026 UPI/CR/448294559836/SHAILEND/ - -",
+      "merchant": "Shailend",
+      "amount": 349.0,
+      "type": "CREDIT",
+      "category": "UPI Person Transfer",
+      "balance": 9664.99,
+      "severity": "CRITICAL",
+      "score": -0.5989,
+      "reasons": [
+        "Unusual pattern detected by AI model"
+      ]
+    },
+    {
+      "index": 116,
+      "date": "06/04/2026",
+      "transaction": "06/04/2026 UPI/DR/203441810514/ADITYA -",
+      "merchant": "Aditya -",
+      "amount": 4578.0,
+      "type": "DEBIT",
+      "category": "UPI Person Transfer",
+      "balance": 9664.99,
+      "severity": "CRITICAL",
+      "score": -0.5875,
+      "reasons": [
+        "Unusual pattern detected by AI model"
+      ]
+    }
+  ],
+  "anomaly_count": 10,
+  "anomaly_rate": 8.5,
+  "avg_if_score": -0.4726,
+  "rules": {
+    "rule_50_30_20": {
+      "needs_pct": 9.8,
+      "wants_pct": 36.7,
+      "saves_pct": 0.0,
+      "needs_ok": true,
+      "wants_ok": false,
+      "saves_ok": false,
+      "status": "FAIL"
+    },
+    "emergency_fund": {
+      "months_covered": 0.1,
+      "target_months": 6,
+      "status": "POOR",
+      "message": "Your balance covers 0.1 months of expenses. Target: 6 months."
+    },
+    "savings_rate": {
+      "rate": -35.7,
+      "status": "POOR",
+      "message": "You saved -35.7% of income. Target: \u226520%."
+    },
+    "volatility": {
+      "cv_percent": 0,
+      "status": "STABLE",
+      "message": "Your monthly spending varies by 0%. Stable pattern."
+    },
+    "concentration": {
+      "top_category": "UPI Person Transfer",
+      "percent": 65.8,
+      "status": "HIGH",
+      "message": "65.8% of spending in 'UPI Person Transfer'. High concentration risk."
+    },
+    "upi_risk": {
+      "amount": 57568.0,
+      "percent": 65.8,
+      "status": "REVIEW",
+      "message": "\u20b957,568 (65.8%) sent via UPI P2P. High \u2014 review recipients."
+    },
+    "recurring": [
+      "Aamar -",
+      "Aman -",
+      "Flipkart",
+      "Gazi Md -",
+      "Kolkata -",
+      "Laxmi -",
+      "Manish -",
+      "Md -"
+    ]
+  },
+  "health": {
+    "score": 30,
+    "label": "POOR",
+    "color": "#ff4d6d",
+    "grades": [
+      [
+        "Savings Rate",
+        "D",
+        "-10"
+      ],
+      [
+        "Emergency Fund",
+        "C",
+        "-5"
+      ],
+      [
+        "50/30/20 Rule",
+        "C",
+        "-5"
+      ],
+      [
+        "Spending Stability",
+        "A",
+        "+10"
+      ],
+      [
+        "Anomaly Risk",
+        "D",
+        "-10"
+      ]
+    ],
+    "recommendations": [
+      "Increase monthly savings to at least 20% of income",
+      "Build emergency fund to cover 6 months (6 more months needed)",
+      "Reduce discretionary spending (entertainment, dining, shopping)",
+      "Diversify spending \u2014 UPI Person Transfer is 65.8% of total",
+      "Review UPI person transfers \u2014 unusually high volume",
+      "Multiple anomalous transactions detected \u2014 review flagged items"
+    ]
+  }
+}
