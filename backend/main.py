@@ -47,7 +47,7 @@ else:
     print("⚠️  Firebase env vars not set – running in dev mode")
  
 # ── Static & pages ────────────────────────────────────────────────────────────
-FRONTEND_DIR = os.getenv("FRONTEND_DIR", os.path.join(os.path.dirname(__file__), "..", "frontend"))
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
  
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
  
