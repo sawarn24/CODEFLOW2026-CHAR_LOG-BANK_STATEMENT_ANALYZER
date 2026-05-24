@@ -22,7 +22,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 router       = APIRouter()
 UPLOAD_DIR   = os.path.join(os.path.dirname(__file__), "..", "..", "uploads")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_API_KEY = os.getenv("groq_api_key")
 GROQ_MODEL   = "openai/gpt-oss-120b"
 
 
